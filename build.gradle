@@ -1,0 +1,26 @@
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+
+buildscript {
+    repositories { jcenter() }
+}
+
+group = 'org.jpos.template'
+version = '2.1.6-SNAPSHOT'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jpos.org/maven' }
+    mavenLocal()
+}
+
+dependencies {
+    implementation 'org.jpos:jpos:2.1.6-SNAPSHOT'
+}
+
+apply from: 'jpos-app.gradle'
+
