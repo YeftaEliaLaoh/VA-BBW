@@ -21,7 +21,6 @@ import java.util.UUID;
 @Path("/auth")
 public class Auth
 {
-    private static final String AUTHENTICATION_SCHEME = "Basic";
 
     @POST
     @Path("/token")
@@ -37,12 +36,12 @@ public class Auth
             String authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
 
             // Validate the Authorization header
-            if (isTokenBasedAuthentication(authorizationHeader))
+            if (isCompleteHeader(authorizationHeader))
             {
                 UUID uuid = UUID.randomUUID();
 
                 // Authorization: Basic base64credentials
-                String base64Credentials = authorizationHeader.substring("Basic".length()).trim();
+                String base64Credentials = authorizationHeader.substring(Config.AUTHENTICATION_BASIC.length()).trim();
                 byte[] credDecoded = Base64.getDecoder().decode(base64Credentials);
                 String credentials = new String(credDecoded, StandardCharsets.UTF_8);
                 // credentials = username:password
@@ -58,7 +57,9 @@ public class Auth
 
                     if (query.list().size() == 0)
                     {
-                        return Response.status(Response.Status.UNAUTHORIZED).build();
+                        response.put("rc", Config.Code_Header_not_complete);
+                        response.put("message", Config.Desc_Header_not_complete);
+                        return Response.accepted(response).build();
                     }
 
                     String sql = "INSERT INTO public.tokens (token,\"timestamp\") VALUES (:token, :timestamp)";
@@ -68,13 +69,16 @@ public class Auth
                     query.executeUpdate();
                     db.commit();
                 }
-
                 response.put("auth_token", uuid);
                 response.put("token_type", "Bearer");
                 response.put("expires_in", Config.expires_in);
             }
             else
-                return Response.status(Response.Status.BAD_REQUEST).build();
+            {
+                response.put("rc", Config.Code_Header_not_complete);
+                response.put("message", Config.Desc_Header_not_complete);
+                return Response.accepted(response).build();
+            }
 
             return Response.ok(response, MediaType.APPLICATION_JSON).status(Response.Status.OK).build();
 
@@ -85,14 +89,10 @@ public class Auth
         }
     }
 
-    private boolean isTokenBasedAuthentication(String authorizationHeader)
+    private boolean isCompleteHeader(String authorizationHeader)
     {
-
-        // Check if the Authorization header is valid
-        // It must not be null and must be prefixed with "Basic" plus a whitespace
-        // The authentication scheme comparison must be case-insensitive
         return authorizationHeader != null && authorizationHeader.toLowerCase()
-                .startsWith(AUTHENTICATION_SCHEME.toLowerCase() + " ");
+                .startsWith(Config.AUTHENTICATION_BASIC.toLowerCase() + " ");
     }
 
 }

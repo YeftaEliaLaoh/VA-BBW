@@ -1,18 +1,16 @@
--- Table: public.users
+INSERT INTO public.users(
+password, username)
+VALUES ( 'bbwpassword', 'bbwuser');
 
--- DROP TABLE public.users;
+INSERT INTO public.virtualaccounts
+(clientid, virtualaccountname, virtualaccountno)
+VALUES ( '001', 'Febri Haryadi', '7771234567890')
 
-CREATE TABLE public.users
-(
-    id integer NOT NULL DEFAULT nextval('user_id_seq'::regclass),
-    username text COLLATE pg_catalog."default",
-    password text COLLATE pg_catalog."default",
-    CONSTRAINT users_pkey PRIMARY KEY (id)
-)
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
+INSERT INTO public.clients(
+	clientid) VALUES ('001');
 
-ALTER TABLE public.users
-    OWNER to postgres;
+git clean -i
+git clean -f
+gradle installResources
+gradle installApp
+build/install/VA-BBW/bin/q2

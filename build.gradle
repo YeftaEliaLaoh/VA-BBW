@@ -20,7 +20,11 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'org.jpos', name: 'jpos', version: '2.1.6'
+    compile('org.jpos:jpos:2.1.6')
+            {
+                exclude(module: 'junit')
+                exclude(module: 'hamcrest-core')
+            }
     providedCompile "org.jpos.ee:jposee-db-postgresql:2.2.7-SNAPSHOT"
     providedCompile "org.jpos.ee:jposee-eerest:2.2.7-SNAPSHOT"
     providedCompile "org.jpos.ee:jposee-jetty:2.2.7-SNAPSHOT"
@@ -35,7 +39,9 @@ dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 }
 
-configurations.all { resolutionStrategy.force 'org.slf4j:slf4j-api:1.7.30' }
+configurations.all {
+    resolutionStrategy.force 'org.slf4j:slf4j-api:1.7.30'
+}
 
 apply from: 'jpos-app.gradle'
 

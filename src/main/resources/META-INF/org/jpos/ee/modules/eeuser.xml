@@ -18,8 +18,11 @@
 
 <module name="eeuser">
     <mappings>
-        <mapping class="org.jpos.rest.models.Users"/>
+        <mapping class="org.jpos.rest.models.Clients"/>
+        <mapping class="org.jpos.rest.models.Payments"/>
+        <mapping class="org.jpos.rest.models.References"/>
         <mapping class="org.jpos.rest.models.Tokens"/>
+        <mapping class="org.jpos.rest.models.Users"/>
         <mapping class="org.jpos.rest.models.VirtualAccounts"/>
     </mappings>
 </module>

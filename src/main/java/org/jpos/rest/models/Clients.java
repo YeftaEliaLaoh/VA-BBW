@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-public class VirtualAccounts implements Serializable
+public class Clients implements Serializable
 {
     private static final long serialVersionUID = -8259326520155524014L;
     @Id
@@ -12,8 +12,6 @@ public class VirtualAccounts implements Serializable
     @Column(columnDefinition = "SERIAL")
     private int id;
     private String clientId;
-    private String virtualAccountNo;
-    private String virtualAccountName;
 
     public int getId()
     {
@@ -35,34 +33,12 @@ public class VirtualAccounts implements Serializable
         this.clientId = clientId;
     }
 
-    public String getVirtualAccountNo()
-    {
-        return virtualAccountNo;
-    }
-
-    public void setVirtualAccountNo(String virtualAccountNo)
-    {
-        this.virtualAccountNo = virtualAccountNo;
-    }
-
-    public String getVirtualAccountName()
-    {
-        return virtualAccountName;
-    }
-
-    public void setVirtualAccountName(String virtualAccountName)
-    {
-        this.virtualAccountName = virtualAccountName;
-    }
-
     @Override
     public String toString()
     {
         return "VirtualAccounts{" +
                 "id=" + id +
                 ", clientId='" + clientId + '\'' +
-                ", virtualAccountNo='" + virtualAccountNo + '\'' +
-                ", virtualAccountName='" + virtualAccountName + '\'' +
                 '}';
     }
 }
