@@ -1,17 +1,17 @@
-String archiveJarName="${project.name}-${project.version}.jar"
-String archiveWarName="${project.name}-${project.version}.war"
-String installDir=file("${project.buildDir}/install/${project.name}")
+String archiveJarName = "${project.name}-${project.version}.jar"
+String archiveWarName = "${project.name}-${project.version}.war"
+String installDir = file("${project.buildDir}/install/${project.name}")
 project.ext {
     def target = project.hasProperty('target') ? target : 'devel'
     targetConfiguration = configure(new Properties()) {
         jarname = archiveJarName
         warname = archiveWarName
-        target  = target
+        target = target
         buildTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss z")
     }
     File cfgFile = file("${rootProject.projectDir}/${target}.properties")
     if (cfgFile.exists()) {
-        cfgFile.withInputStream{
+        cfgFile.withInputStream {
             targetConfiguration.load(it);
         }
     }
@@ -33,8 +33,8 @@ def jposCopySpec = copySpec {
         exclude '**/*.war'
         exclude '**/*.dat'
         filter(
-            org.apache.tools.ant.filters.ReplaceTokens, 
-            tokens: targetConfiguration
+                org.apache.tools.ant.filters.ReplaceTokens,
+                tokens: targetConfiguration
         )
     }
     from(file("src/dist")) {
@@ -77,20 +77,22 @@ def jposNoConfigCopySpec = copySpec {
 }
 
 // Create the jar's manifest
-jar.manifest {
-    attributes \
-        'Implementation-Title': project.name,
-        'Implementation-Version': project.version,
-        'Main-Class': 'org.jpos.q2.Q2',
-        'Class-Path': configurations.runtimeClasspath.collect { "lib/" + it.getName() }.join(' ')
+jar {
+    manifest {
+        attributes("Implementation-Title": project.name ,
+        "Implementation-Version" : project.version ,
+        "Main-Class" : "org.jpos.q2.Q2" ,
+        "Class-Path" : configurations.runtimeClasspath.collect { "lib/" + it.getName() }.join(' ')
+        )
+    }
 }
 
-task sourceJar( type: Jar ) {
+task sourceJar(type: Jar) {
     classifier = "sources"
     from sourceSets.main.allSource
 }
 
-task javadocJar (type: Jar, dependsOn: javadoc) {
+task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from new File(project.buildDir, 'docs/javadoc')
 }
@@ -106,8 +108,8 @@ processResources {
         include '**/*.cfg'
         include '**/*.asc'
         filter(
-            org.apache.tools.ant.filters.ReplaceTokens, 
-            tokens: targetConfiguration
+                org.apache.tools.ant.filters.ReplaceTokens,
+                tokens: targetConfiguration
         )
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
@@ -116,11 +118,11 @@ processResources {
 // TASKS
 //--------------------------------------------------
 
-task version (type: JavaExec, dependsOn: classes) {
+task version(type: JavaExec, dependsOn: classes) {
     description = "Shows jPOS Version"
     main = 'org.jpos.q2.Q2'
     args = ['--version']
-    classpath configurations.runtime 
+    classpath configurations.runtime
 }
 
 task dist(type: Tar) {
@@ -130,17 +132,17 @@ task dist(type: Tar) {
     includeEmptyDirs true
     into "$project.name-$project.version"
     with jposCopySpec
-    archiveExtension="tar.gz"
+    archiveExtension = "tar.gz"
 }
 
-task distnc (type: Tar) {
+task distnc(type: Tar) {
     dependsOn 'assemble', 'sourceJar'
     description 'Creates tar distribution without configuration'
     compression = Compression.GZIP
     includeEmptyDirs true
     into "$project.name-$project.version"
     with jposNoConfigCopySpec
-    archiveExtension="tar.gz"
+    archiveExtension = "tar.gz"
     archiveAppendix = "nc"
 }
 
@@ -164,9 +166,9 @@ task installResources(dependsOn: 'classes', type: JavaExec) {
     args = ["--outputDir=src/dist"]
 }
 
-task run( dependsOn: 'installApp', type: Exec ) {
+task run(dependsOn: 'installApp', type: Exec) {
     workingDir installDir
-    commandLine 'java','-jar', archiveJarName
+    commandLine 'java', '-jar', archiveJarName
 }
 
 /*
@@ -183,18 +185,19 @@ task genDocker(type: Docker, dependsOn: 'jar') {
 }
 */
 
-class GitRevisionTask extends DefaultTask
-{
-    @InputFile @Optional
+class GitRevisionTask extends DefaultTask {
+    @InputFile
+    @Optional
     File gitHead
 
-    @Input 
+    @Input
     boolean gotHead
 
-    @InputFile @Optional
+    @InputFile
+    @Optional
     File getRefFile() {
         if (gitHead != null) {
-            File rf = new File(gitHead.parent,gitHead.text.replace('ref: ', '').trim())
+            File rf = new File(gitHead.parent, gitHead.text.replace('ref: ', '').trim())
             return rf.exists() ? rf : gitHead
         } else {
             return gitHead
@@ -205,23 +208,22 @@ class GitRevisionTask extends DefaultTask
     File outputFile
 
     @TaskAction
-    public void writeFile()
-    {
-        Properties props=new Properties()
+    public void writeFile() {
+        Properties props = new Properties()
         if (gotHead) {
-            File ref=getRefFile()
+            File ref = getRefFile()
             if (ref != null && ref.exists()) {
-                props.put("branch",ref.getName())
-                props.put("revision",ref.text.substring(0,7))
+                props.put("branch", ref.getName())
+                props.put("revision", ref.text.substring(0, 7))
             } else {
                 props.put("branch", "detached");
-                props.put("revision", gitHead.text.substring(0,7))
+                props.put("revision", gitHead.text.substring(0, 7))
             }
         } else {
             props.put("branch", "unknown");
             props.put("revision", "unknown");
         }
-        props.store(new FileOutputStream(outputFile),"Revision Properties")
+        props.store(new FileOutputStream(outputFile), "Revision Properties")
     }
 }
 
@@ -232,10 +234,10 @@ class BuildTimestampTask extends DefaultTask {
     @TaskAction
     public void writeFile() {
         new File(outputFile.parent).mkdirs()
-        Properties props=new Properties()
+        Properties props = new Properties()
         props.put("version", project.version);
         props.put("buildTimestamp", new Date().format("yyyy-MM-dd HH:mm:ss z"));
-        props.store(new FileOutputStream(outputFile),"Revision Properties")
+        props.store(new FileOutputStream(outputFile), "Revision Properties")
     }
 }
 
@@ -253,10 +255,10 @@ task createRevisionPropertyFile(type: GitRevisionTask) {
 
 processResources.dependsOn createBuildTimestampPropertyFile, createRevisionPropertyFile
 
-task viewTests (description: 'Open Test Reports') {
+task viewTests(description: 'Open Test Reports') {
     doLast {
         Class.forName("java.awt.Desktop").newInstance().browse(
-            new File("${buildDir}/reports/tests/test", 'index.html').toURI())
+                new File("${buildDir}/reports/tests/test", 'index.html').toURI())
     }
 }
 
