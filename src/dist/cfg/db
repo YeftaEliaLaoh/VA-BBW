@@ -1,3 +1,216 @@
+-- SEQUENCE: public.clients_id_seq
+
+-- DROP SEQUENCE public.clients_id_seq;
+
+CREATE SEQUENCE public.clients_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1;
+
+ALTER SEQUENCE public.clients_id_seq
+    OWNER TO postgres;
+
+
+-- SEQUENCE: public.payments_id_seq
+
+-- DROP SEQUENCE public.payments_id_seq;
+
+CREATE SEQUENCE public.payments_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1;
+
+ALTER SEQUENCE public.payments_id_seq
+    OWNER TO postgres;
+
+
+-- SEQUENCE: public.references_id_seq
+
+-- DROP SEQUENCE public.references_id_seq;
+
+CREATE SEQUENCE public.references_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1;
+
+ALTER SEQUENCE public.references_id_seq
+    OWNER TO postgres;
+
+
+-- SEQUENCE: public.tokens_id_seq
+
+-- DROP SEQUENCE public.tokens_id_seq;
+
+CREATE SEQUENCE public.tokens_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1;
+
+ALTER SEQUENCE public.tokens_id_seq
+    OWNER TO postgres;
+
+
+-- SEQUENCE: public.users_id_seq
+
+-- DROP SEQUENCE public.users_id_seq;
+
+CREATE SEQUENCE public.users_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1;
+
+ALTER SEQUENCE public.users_id_seq
+    OWNER TO postgres;
+
+
+-- SEQUENCE: public.virtualaccounts_id_seq
+
+-- DROP SEQUENCE public.virtualaccounts_id_seq;
+
+CREATE SEQUENCE public.virtualaccounts_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1;
+
+ALTER SEQUENCE public.virtualaccounts_id_seq
+    OWNER TO postgres;
+
+-- 1.  Table: public.clients
+
+-- DROP TABLE public.clients;
+
+CREATE TABLE public.clients
+(
+    id integer NOT NULL DEFAULT nextval('clients_id_seq'::regclass),
+    clientid character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT clients_pkey PRIMARY KEY (id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.clients
+    OWNER to postgres;
+
+
+-- 2.  Table: public.payments
+
+-- DROP TABLE public.payments;
+
+CREATE TABLE public.payments
+(
+    id integer NOT NULL DEFAULT nextval('payments_id_seq'::regclass),
+    amount character varying(255) COLLATE pg_catalog."default",
+    clientid character varying(255) COLLATE pg_catalog."default",
+    note character varying(255) COLLATE pg_catalog."default",
+    transactionnumber character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT payments_pkey PRIMARY KEY (id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.payments
+    OWNER to postgres;
+
+
+-- 3.  Table: public.references
+
+-- DROP TABLE public."references";
+
+CREATE TABLE public."references"
+(
+    id integer NOT NULL DEFAULT nextval('references_id_seq'::regclass),
+    clientid character varying(255) COLLATE pg_catalog."default",
+    referencenumber character varying(255) COLLATE pg_catalog."default",
+    transactionnumber character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT references_pkey PRIMARY KEY (id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public."references"
+    OWNER to postgres;
+
+
+-- 4.  Table: public.tokens
+
+-- DROP TABLE public.tokens;
+
+CREATE TABLE public.tokens
+(
+    id integer NOT NULL DEFAULT nextval('tokens_id_seq'::regclass),
+    "timestamp" bigint,
+    token character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT tokens_pkey PRIMARY KEY (id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.tokens
+    OWNER to postgres;
+
+
+ -- 5.  Table: public.users
+
+ -- DROP TABLE public.users;
+
+ CREATE TABLE public.users
+ (
+     id integer NOT NULL DEFAULT nextval('users_id_seq'::regclass),
+     password character varying(255) COLLATE pg_catalog."default",
+     username character varying(255) COLLATE pg_catalog."default",
+     CONSTRAINT users_pkey PRIMARY KEY (id)
+ )
+ WITH (
+     OIDS = FALSE
+ )
+ TABLESPACE pg_default;
+
+ ALTER TABLE public.users
+     OWNER to postgres;
+
+
+
+ -- 6.  Table: public.virtualaccounts
+
+ -- DROP TABLE public.virtualaccounts;
+
+ CREATE TABLE public.virtualaccounts
+ (
+     id integer NOT NULL DEFAULT nextval('virtualaccounts_id_seq'::regclass),
+     clientid character varying(255) COLLATE pg_catalog."default",
+     virtualaccountname character varying(255) COLLATE pg_catalog."default",
+     virtualaccountno character varying(255) COLLATE pg_catalog."default",
+     CONSTRAINT virtualaccounts_pkey PRIMARY KEY (id)
+ )
+ WITH (
+     OIDS = FALSE
+ )
+ TABLESPACE pg_default;
+
+ ALTER TABLE public.virtualaccounts
+     OWNER to postgres;
+
+
 INSERT INTO public.users(
 password, username)
 VALUES ( 'bbwpassword', 'bbwuser');
@@ -9,8 +222,7 @@ VALUES ( '001', 'Febri Haryadi', '7771234567890')
 INSERT INTO public.clients(
 	clientid) VALUES ('001');
 
-git clean -i
-git clean -f
+git clean
 gradle installResources
 gradle installApp
 build/install/VA-BBW/bin/q2
