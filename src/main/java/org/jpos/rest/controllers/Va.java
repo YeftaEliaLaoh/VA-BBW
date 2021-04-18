@@ -1,5 +1,6 @@
 package org.jpos.rest.controllers;
 
+import com.google.common.hash.Hashing;
 import org.hibernate.query.Query;
 import org.jpos.ee.DB;
 import org.jpos.rest.utilties.Config;
@@ -15,6 +16,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,17 +33,28 @@ public class Va
         Map<String, Object> response = new HashMap<>();
         try
         {
+            org.codehaus.jettison.json.JSONObject jettison = new org.codehaus.jettison.json.JSONObject(requestBody);
             String authorizationHeader = containerRequestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
+            String token = authorizationHeader.substring(Config.AUTHENTICATION_BEARER.length()).trim();
+            String xBBWTimestamp = containerRequestContext.getHeaderString(Config.X_BBW_Timestamp);
+            String xBBWSignature = containerRequestContext.getHeaderString(Config.X_BBW_Signature);
+
             if (!isCompleteHeader(authorizationHeader))
             {
                 response.put("rc", Config.Code_Header_not_complete);
                 response.put("message", Config.Desc_Header_not_complete);
                 return Response.accepted(response).build();
             }
-            else if (!isTokenValid(authorizationHeader))
+            else if (!isTokenValid(token))
             {
                 response.put("rc", Config.Code_Token_not_valid);
                 response.put("message", Config.Desc_Token_not_valid);
+                return Response.accepted(response).build();
+            }
+            else if (!isSignatureValid(xBBWSignature, jettison.toString(), token, xBBWTimestamp))
+            {
+                response.put("rc", Config.Code_Signature_not_valid);
+                response.put("message", Config.Desc_Signature_not_valid);
                 return Response.accepted(response).build();
             }
 
@@ -113,20 +126,29 @@ public class Va
         Map<String, Object> response = new HashMap<>();
         try
         {
+            org.codehaus.jettison.json.JSONObject jettison = new org.codehaus.jettison.json.JSONObject(requestBody);
             String authorizationHeader = containerRequestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
+            String token = authorizationHeader.substring(Config.AUTHENTICATION_BEARER.length()).trim();
+            String xBBWTimestamp = containerRequestContext.getHeaderString(Config.X_BBW_Timestamp);
+            String xBBWSignature = containerRequestContext.getHeaderString(Config.X_BBW_Signature);
             if (!isCompleteHeader(authorizationHeader))
             {
                 response.put("rc", Config.Code_Header_not_complete);
                 response.put("message", Config.Desc_Header_not_complete);
                 return Response.accepted(response).build();
             }
-            else if (!isTokenValid(authorizationHeader))
+            else if (!isTokenValid(token))
             {
                 response.put("rc", Config.Code_Token_not_valid);
                 response.put("message", Config.Desc_Token_not_valid);
                 return Response.accepted(response).build();
             }
-
+            else if (!isSignatureValid(xBBWSignature, jettison.toString(), token, xBBWTimestamp))
+            {
+                response.put("rc", Config.Code_Signature_not_valid);
+                response.put("message", Config.Desc_Signature_not_valid);
+                return Response.accepted(response).build();
+            }
             JSONObject jsonObject = new JSONObject(requestBody);
             String transactionNumber = jsonObject.get("virtual_account") +
                     "" + jsonObject.get("reference_number") +
@@ -178,10 +200,9 @@ public class Va
                 .startsWith(Config.AUTHENTICATION_BEARER.toLowerCase() + " ");
     }
 
-    private boolean isTokenValid(String authorizationHeader)
+    private boolean isTokenValid(String token)
     {
         BigInteger count;
-        String token = authorizationHeader.substring(Config.AUTHENTICATION_BEARER.length()).trim();
         try (DB db = new DB())
         {
             db.open();
@@ -195,5 +216,14 @@ public class Va
         return count.intValue() > 0;
     }
 
+    private boolean isSignatureValid(String xBBWSignature, String requestBody, String auth_token, String timestamp_iso)
+    {
+        String signature_secret = "1d7c9dedc7d3e187e5e908df1780c6c3899";
+        String body_hex = org.apache.commons.codec.digest.DigestUtils.sha256Hex(requestBody);
+        String string_to_sign = auth_token + ":" + body_hex + ":" + timestamp_iso;
+        String signature = Hashing.hmacSha256(signature_secret.getBytes(StandardCharsets.UTF_8))
+                .hashString(string_to_sign, StandardCharsets.UTF_8).toString();
+        return (xBBWSignature.equalsIgnoreCase(signature));
+    }
 
 }

@@ -24,4 +24,6 @@ public class Config
 
     public static String AUTHENTICATION_BASIC = "Basic";
     public static String AUTHENTICATION_BEARER = "Bearer";
+    public static String X_BBW_Signature = "X-BBW-Signature";
+    public static String X_BBW_Timestamp = "X-BBW-Timestamp";
 }
